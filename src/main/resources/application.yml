@@ -1,0 +1,56 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: smart-context-ai
+  codec:
+    max-in-memory-size: 20MB
+  r2dbc:
+    url: r2dbc:postgresql://127.0.0.1:5433/smartcontext
+    username: smartcontext
+    password: smartcontext
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5433/smartcontext
+    username: smartcontext
+    password: smartcontext
+  flyway:
+    enabled: true
+    url: jdbc:postgresql://127.0.0.1:5433/smartcontext
+    user: smartcontext
+    password: smartcontext
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 1
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+app:
+  upload-dir: ./data/uploads
+  kafka:
+    bootstrap-servers: localhost:9092
+    topic: document.uploaded
+    group-id: smart-context-ingest
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    base-url: https://api.openai.com
+    embedding-model: text-embedding-3-small
+    chat-model: gpt-4o-mini
+  security:
+    api-keys: ${APP_API_KEYS:}
+  rate-limit:
+    enabled: true
+    requests-per-minute: 60
+  cache:
+    embedding-ttl: 24h

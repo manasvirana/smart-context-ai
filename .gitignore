@@ -1,0 +1,42 @@
+# Gradle / Java build output
+.gradle/
+build/
+bin/
+out/
+target/
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*.log
+replay_pid*.log
+*.hprof
+
+# IDE (machine-specific paths)
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.factorypath
+.vscode/
+*.code-workspace
+
+# Secrets — never commit keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+secrets/
+
+# Uploaded documents and local runtime files
+data/
+uploads/
+
+# Logs and OS junk
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
