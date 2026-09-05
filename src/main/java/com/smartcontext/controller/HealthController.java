@@ -28,8 +28,8 @@ public class HealthController {
                 .map(n -> Integer.valueOf(1).equals(n) ? "UP" : "DOWN")
                 .onErrorReturn("DOWN");
 
-        Mono<String> redisStatus = redis.opsForValue().increment("sc:health")
-                .map(v -> "UP")
+        Mono<String> redisStatus = redis.hasKey("__health__")
+                .map(ignored -> "UP")
                 .onErrorReturn("DOWN");
 
         return Mono.zip(postgres, redisStatus)
