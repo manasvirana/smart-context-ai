@@ -38,7 +38,7 @@ public class IngestConsumer {
                 .receive()
                 .concatMap(record -> Mono.fromCallable(() -> objectMapper.readValue(record.value(), DocumentUploadedEvent.class))
                         .flatMap(ingestService::handle)
-                        .then(record.receiverOffset().commit())
+                        .then(Mono.defer(() -> record.receiverOffset().commit()))
                         .doOnError(e -> log.error("kafka record failed", e))
                         .onErrorResume(e -> record.receiverOffset().commit()))
                 .subscribe();
