@@ -23,6 +23,7 @@ public class IngestService {
     private static final Logger log = LoggerFactory.getLogger(IngestService.class);
     private static final int CHUNK_SIZE = 1200;
     private static final int OVERLAP = 200;
+    private static final String EMBEDDING_WARNING = "embeddings unavailable, keyword search only; reindex to retry";
 
     private final DocumentRepository documents;
     private final ChunkRepository chunks;
@@ -94,17 +95,21 @@ public class IngestService {
                                     }))
                             : Mono.just(java.util.Collections.nCopies(pieces.size(), (String) null));
 
-                    return vectors.flatMap(embs -> chunks.deleteByDocumentId(id)
-                            .thenMany(Flux.range(0, pieces.size())
-                                    .concatMap(i -> chunks.insert(
-                                            UUID.randomUUID(),
-                                            id,
-                                            i,
-                                            pieces.get(i),
-                                            embs.get(i)
-                                    )))
-                            .then(documents.updateStatus(id, DocumentStatus.READY, null, pieces.size()))
-                            .thenReturn(pieces.size()));
+                    return vectors.flatMap(embs -> {
+                        boolean embeddingFailed = properties.getOpenai().configured() && embs.get(0) == null;
+                        String warning = embeddingFailed ? EMBEDDING_WARNING : null;
+                        return chunks.deleteByDocumentId(id)
+                                .thenMany(Flux.range(0, pieces.size())
+                                        .concatMap(i -> chunks.insert(
+                                                UUID.randomUUID(),
+                                                id,
+                                                i,
+                                                pieces.get(i),
+                                                embs.get(i)
+                                        )))
+                                .then(documents.updateStatus(id, DocumentStatus.READY, warning, pieces.size()))
+                                .thenReturn(pieces.size());
+                    });
                 });
     }
 }

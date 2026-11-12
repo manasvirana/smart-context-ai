@@ -21,6 +21,8 @@ import java.util.Map;
 @Service
 public class OpenAiService {
 
+    private static final int EMBEDDING_BATCH_SIZE = 100;
+
     private final WebClient webClient;
     private final AppProperties properties;
     private final ObjectMapper objectMapper;
@@ -64,7 +66,7 @@ public class OpenAiService {
                     if (missText.isEmpty()) {
                         return Mono.just(cached.stream().map(s -> s.vector).toList());
                     }
-                    return embedRemote(missText)
+                    return embedInBatches(missText)
                             .flatMap(fresh -> {
                                 List<List<Double>> ordered = new ArrayList<>(inputs.size());
                                 for (int i = 0; i < inputs.size(); i++) {
@@ -85,6 +87,21 @@ public class OpenAiService {
                                 return Flux.concat(stores).then(Mono.just(ordered));
                             });
                 });
+    }
+
+    private Mono<List<List<Double>>> embedInBatches(List<String> inputs) {
+        return Flux.fromIterable(partition(inputs, EMBEDDING_BATCH_SIZE))
+                .concatMap(this::embedRemote)
+                .collectList()
+                .map(batches -> batches.stream().flatMap(List::stream).toList());
+    }
+
+    private static List<List<String>> partition(List<String> items, int size) {
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < items.size(); i += size) {
+            batches.add(items.subList(i, Math.min(i + size, items.size())));
+        }
+        return batches;
     }
 
     private Mono<List<List<Double>>> embedRemote(List<String> inputs) {
