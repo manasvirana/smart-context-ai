@@ -4,21 +4,23 @@ server:
 spring:
   application:
     name: smart-context-ai
+  config:
+    import: optional:file:.env[.properties]
   codec:
     max-in-memory-size: 20MB
   r2dbc:
     url: r2dbc:postgresql://127.0.0.1:5433/smartcontext
     username: smartcontext
-    password: smartcontext
+    password: ${DB_PASSWORD}
   datasource:
     url: jdbc:postgresql://127.0.0.1:5433/smartcontext
     username: smartcontext
-    password: smartcontext
+    password: ${DB_PASSWORD}
   flyway:
     enabled: true
     url: jdbc:postgresql://127.0.0.1:5433/smartcontext
     user: smartcontext
-    password: smartcontext
+    password: ${DB_PASSWORD}
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1

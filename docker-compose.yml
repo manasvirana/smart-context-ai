@@ -3,7 +3,7 @@ services:
     image: pgvector/pgvector:pg16
     environment:
       POSTGRES_USER: smartcontext
-      POSTGRES_PASSWORD: smartcontext
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
       POSTGRES_DB: smartcontext
     ports:
       - "5433:5432"

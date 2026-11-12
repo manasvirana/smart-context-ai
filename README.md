@@ -35,7 +35,13 @@ If embeddings or chat fail (including HTTP 429), chunks and keyword/latest retri
 
 ## Run
 
-Docker Desktop, then:
+Docker Desktop, then create your local env file (it is gitignored):
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Set `DB_PASSWORD` in `.env`, then:
 
 ```bash
 docker compose up -d
@@ -146,6 +152,7 @@ src/main/resources/db/migration/
 
 | Variable | Purpose |
 | --- | --- |
+| `DB_PASSWORD` | Postgres password, read from `.env` by Compose and the app |
 | `OPENAI_API_KEY` | Embeddings and chat |
 | `APP_API_KEYS` | Comma-separated keys; empty = open API |
 
