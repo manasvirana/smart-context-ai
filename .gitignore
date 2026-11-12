@@ -23,7 +23,7 @@ replay_pid*.log
 .vscode/
 *.code-workspace
 
-# Secrets — never commit keys
+# Secrets - never commit keys
 .env
 .env.*
 !.env.example
@@ -41,3 +41,11 @@ uploads/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local API client workspaces
+.postman/
+postman/
+
+# Personal study notes (do not push)
+Smart-Context-AI-Interview-Notes.pdf
+INTERVIEW_NOTES.md

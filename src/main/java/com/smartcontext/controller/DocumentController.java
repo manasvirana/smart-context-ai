@@ -35,7 +35,7 @@ public class DocumentController {
     public Mono<ResponseEntity<DocumentStatusResponse>> status(@PathVariable UUID id) {
         return documentService.getStatus(id)
                 .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.<DocumentStatusResponse>notFound().build());
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/v1/documents/{id}/reindex")
