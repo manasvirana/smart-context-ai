@@ -57,6 +57,7 @@ public class ChunkRepository {
                 FROM chunks c
                 JOIN documents d ON d.id = c.document_id
                 WHERE c.content_tsv @@ plainto_tsquery('english', :query)
+                AND d.status = 'READY'
                 %s
                 ORDER BY score DESC
                 LIMIT :topK
@@ -76,6 +77,7 @@ public class ChunkRepository {
                     SELECT id, ROW_NUMBER() OVER (ORDER BY embedding <=> CAST(:emb AS vector)) AS rank
                     FROM chunks
                     WHERE embedding IS NOT NULL
+                    AND document_id IN (SELECT id FROM documents WHERE status = 'READY')
                     %s
                     ORDER BY embedding <=> CAST(:emb AS vector)
                     LIMIT 20
@@ -84,6 +86,7 @@ public class ChunkRepository {
                     SELECT id, ROW_NUMBER() OVER (ORDER BY ts_rank(content_tsv, plainto_tsquery('english', :query)) DESC) AS rank
                     FROM chunks
                     WHERE content_tsv @@ plainto_tsquery('english', :query)
+                    AND document_id IN (SELECT id FROM documents WHERE status = 'READY')
                     %s
                     LIMIT 20
                 ),
@@ -113,10 +116,11 @@ public class ChunkRepository {
                 SELECT c.id, c.document_id, c.chunk_index, c.content, d.original_filename, 0 AS score
                 FROM chunks c
                 JOIN documents d ON d.id = c.document_id
+                WHERE d.status = 'READY'
                 %s
                 ORDER BY c.created_at DESC
                 LIMIT :topK
-                """.formatted(filter ? "WHERE c.document_id = ANY(CAST(:docIds AS uuid[]))" : "");
+                """.formatted(filter ? "AND c.document_id = ANY(CAST(:docIds AS uuid[]))" : "");
         var spec = db.sql(sql).bind("topK", topK);
         if (filter) {
             spec = spec.bind("docIds", pgArray(documentIds));
